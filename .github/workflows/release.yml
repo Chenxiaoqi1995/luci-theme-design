@@ -55,7 +55,7 @@ jobs:
           sdkMap["24.10.4"]="openwrt-sdk-24.10.4-armsr-armv8_gcc-13.3.0_musl"
           SDK=${sdkMap["${{ inputs.sdk_version }}"]}
           echo "USE SDK=$SDK"
-          wget https://archive.openwrt.org/releases/${{ inputs.sdk_version }}/targets/x86/64/$SDK.Linux-x86_64.tar.xz
+          wget https://archive.openwrt.org/releases/${{ inputs.sdk_version }}/targets/armsr/armv8/$SDK.Linux-x86_64.tar.xz
           xz -d $SDK.Linux-x86_64.tar.xz
           tar -xf $SDK.Linux-x86_64.tar
           mv $SDK.Linux-x86_64 openwrt-sdk
