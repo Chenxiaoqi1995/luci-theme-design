@@ -3,7 +3,7 @@ name: Release 21.02
 on:
   push:
     tags:
-      - 'v*'
+      - 'v1.0.0'
   repository_dispatch:
   workflow_dispatch:
     inputs:
@@ -27,10 +27,6 @@ on:
         required: false
         type: boolean
         default: true
-      custom_tag:
-        description: '手动触发时的Release标签（需符合v*格式，如v1.0.0）'
-        required: false
-        default: ''
 
 jobs:
   build:
@@ -73,11 +69,7 @@ jobs:
           echo "CONFIG_PACKAGE_luci-theme-design=y" >> .config
           make defconfig
           make package/luci-theme-design/compile V=s -j$(nproc)
-          TARGET="$(find bin/ -name "luci-theme-design_*.ipk" | head -n1)"
-          if [ -z "$TARGET" ]; then
-            echo "未找到编译产物！"
-            exit 1
-          fi
+          TARGET="$(find bin/ | grep  luci-theme-design)"
           echo "TARGET=$(pwd)/$TARGET"
           echo "TARGET=$(pwd)/$TARGET" >> $GITHUB_OUTPUT
           echo "status=success" >> $GITHUB_OUTPUT
@@ -91,32 +83,20 @@ jobs:
 
       - name: Get tag
         id: tag
+        uses: dawidd6/action-get-tag@v1
         if: steps.build.outputs.status == 'success' && github.event.inputs.upload_release == 'true' && !cancelled()
-        run: |
-          # 标签推送触发：使用原有标签
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_type }}" = "tag" ]; then
-            TAG="${{ github.ref_name }}"
-            echo "使用推送的标签：$TAG"
-          else
-            # 手动触发：使用自定义标签
-            TAG="${{ github.event.inputs.custom_tag }}"
-            # 校验标签格式（必须以v开头）
-            if ! echo "$TAG" | grep -q '^v'; then
-              echo "错误：手动触发时标签必须以v开头（如v1.0.0）"
-              exit 1
-            fi
-            echo "使用自定义标签：$TAG"
-          fi
-          echo "TAG=$TAG" >> $GITHUB_OUTPUT
-
+        with:
+        # Optionally strip `v` prefix
+          strip_v: false
+          
       - name: Upload to release
         uses: softprops/action-gh-release@v1
         if: steps.build.outputs.status == 'success' && github.event.inputs.upload_release == 'true' && !cancelled()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{ steps.tag.outputs.TAG }} (SDK: ${{ inputs.sdk_version }})
-          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: ${{ steps.tag.outputs.tag }}
+          tag_name: ${{ steps.tag.outputs.tag }}
           prerelease: false
           generate_release_notes: true
           files: |
