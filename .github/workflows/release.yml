@@ -11,7 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -46,22 +45,31 @@ jobs:
           echo "TARGET=$(pwd)/$TARGET" >> $GITHUB_OUTPUT
           echo "status=success" >> $GITHUB_OUTPUT
 
+      # 仅在 Tag 触发时获取 Tag 信息
       - name: Get tag
         id: tag
+        if: startsWith(github.ref, 'refs/tags/')
         uses: dawidd6/action-get-tag@v1
         with:
-        # Optionally strip `v` prefix
           strip_v: false
 
+      # 非 Tag 触发时手动设置版本号（避免 Release 失败）
+      - name: Set manual version
+        id: manual_version
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo "tag=dev-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+
+      # 上传 Release：Tag 触发用 Tag 名，非 Tag 触发用手动版本号
       - name: Upload to release
         uses: softprops/action-gh-release@v1
         if: steps.build.outputs.status == 'success' && !cancelled()
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{ steps.tag.outputs.tag }}
-          tag_name: ${{ steps.tag.outputs.tag }}
-          prerelease: false
+          name: ${{ startsWith(github.ref, 'refs/tags/') && steps.tag.outputs.tag || steps.manual_version.outputs.tag }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && steps.tag.outputs.tag || steps.manual_version.outputs.tag }}
+          prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}
           generate_release_notes: true
           files: |
             ${{ steps.build.outputs.TARGET }}
