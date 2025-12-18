@@ -84,14 +84,13 @@ jobs:
       - name: Get tag
         id: tag
         uses: dawidd6/action-get-tag@v1
-        if: steps.build.outputs.status == 'success' && github.event.inputs.upload_release == 'true' && !cancelled()
         with:
         # Optionally strip `v` prefix
           strip_v: false
-          
+
       - name: Upload to release
         uses: softprops/action-gh-release@v1
-        if: steps.build.outputs.status == 'success' && github.event.inputs.upload_release == 'true' && !cancelled()
+        if: steps.build.outputs.status == 'success' && !cancelled()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
