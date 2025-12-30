@@ -698,6 +698,9 @@ span[data-indicator="uci-changes"] {
     font-weight: bold;
     font-size: 1.1rem;
     transition: all 0.2s;
+    align-items: center;    /* 图标和文字垂直居中 */
+    gap: 10px;              /* 图标和文字之间的间距（可按需调整） */
+    padding: 0.675rem 0 0.675rem 2.5rem; /* 保持原有的内边距 */
 }
 
 .main > .main-left > .nav > .slide,
@@ -751,6 +754,12 @@ span[data-indicator="uci-changes"] {
     speak: none;
     font-size: 1.2rem !important;
     -webkit-font-smoothing: antialiased;
+        content: attr(data-icon); /* 保持原有的图标内容 */
+        width: 22px;              /* 统一图标宽度（根据图标大小调整） */
+        text-align: center;       /* 图标在固定宽度内居中 */
+        position: static;         /* 取消原有的绝对/相对定位（避免干扰） */
+        left: 0;                  /* 重置定位属性 */
+        top: 0;
 }
 
 .main > .main-left > .nav > .slide > a[data-title="Status"]:before {
@@ -782,7 +791,7 @@ span[data-indicator="uci-changes"] {
 }
 
 .main > .main-left > .nav > .slide > a[data-title="Bandwidth Monitor"]:before {
-    content: "\e764";
+    content: "\e913";
 }
 
 .main .main-left .nav li.slide .menu[data-title="Statistics"]:before {
@@ -797,11 +806,11 @@ span[data-indicator="uci-changes"] {
 	content: "\e7dd";
 }
 
-.main > .main-left > .nav > li > a[data-title="Inital Setup"]:before {
-    content: "\e67e";
+.main > .main-left > .nav > li > a[data-title="QuickStart"]:before {
+    content: "\e764";
 }
 
-.main > .main-left > .nav > li > a[href="/cgi-bin/luci//admin/wizard"]:before {
+.main > .main-left > .nav > li > a[data-title="NetworkGuide"]:before {
     content: "\e67e";
 }
 
@@ -2325,7 +2334,7 @@ td > .ifacebadge,
 	margin-top: .1rem;
 }
 
-/* 去掉 checkbox �?radio 的背景和边框 */
+/* 去掉 checkbox  ?radio 的背景和边框 */
 input[type="checkbox"],
 input[type="radio"] {
 	background: transparent !important;
